@@ -16,28 +16,21 @@ if config['space_test']
   end
   # the @config@ hash is only available to the recipe
   # the @prefs{}@ hash is available to all the recipes
-  case config['orbit']
-    when 'leo'
-      prefs[:test_orbit] = 'leo'
-    when 'spy'
-      prefs[:test_orbit] = 'spy'
-    when 'gps'
-      prefs[:test_orbit] = 'gps'
-  end
+  prefs[:test_orbit] = config['orbit']
 end
 
-after_bundler do
+stage_two do
   # Code here is run after Bundler installs all the gems for the project.
   # Use this section to run generators and rake tasks.
   # Download any files from a repository for models, controllers, views, and routes.
-  say_wizard "recipe running after 'bundle install'"
+  say_wizard "recipe stage two"
 end
 
-after_everything do
-  # This block is run after the 'after_bundler' block.
+stage_three do
+  # This block is run after the 'stage_two' block.
   # Use this section to finalize the application.
   # Run database migrations or make a final git commit.
-  say_wizard "recipe running after everything"
+  say_wizard "recipe stage three"
 end
 
 # A recipe has two parts: the Ruby code and YAML matter that comes after a blank line with the __END__ keyword.

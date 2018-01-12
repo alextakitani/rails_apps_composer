@@ -1,5 +1,6 @@
 require 'rails_wizard'
 require 'thor'
+require 'tempfile'
 
 module RailsWizard
   class Command < Thor
@@ -11,12 +12,17 @@ module RailsWizard
     method_option :no_default_recipes, :type => :boolean, :aliases => "-L"
     method_option :template_root, :type => :string, :aliases => '-t'
     method_option :quiet, :type => :boolean, :aliases => "-q", :default => false
+    method_option :verbose, :type => :boolean, :aliases => "-V", :default => false
     def new(name)
       add_recipes
       recipes, defaults = load_defaults
+      (print "\ndefaults: "; p defaults) if options[:verbose]
       args = ask_for_args(defaults)
+      (print "\nargs: "; p args) if options[:verbose]
       recipes = ask_for_recipes(recipes)
+      (print "\nrecipes: "; p recipes) if options[:verbose]
       gems = ask_for_gems(defaults)
+      (print "\ngems: "; p gems) if options[:verbose]
       run_template(name, recipes, gems, args, defaults, nil)
     end
 
@@ -27,6 +33,7 @@ module RailsWizard
     method_option :no_default_recipes, :type => :boolean, :aliases => "-L"
     method_option :template_root, :type => :string, :aliases => '-t'
     method_option :quiet, :type => :boolean, :aliases => "-q", :default => false
+    method_option :verbose, :type => :boolean, :aliases => "-V", :default => false
     def template(template_name)
       add_recipes
       recipes, defaults = load_defaults
@@ -42,7 +49,7 @@ module RailsWizard
       else
         RailsWizard::Recipes.list_classes
       end
-      address = 'http://railsapps.github.io/tutorial-rails-apps-composer.html#Recipes'
+      address = 'https://github.com/RailsApps/rails_apps_composer/wiki/tutorial-rails-apps-composer#recipes'
       say("To learn more about recipes, see:\n#{address}", [:bold, :cyan])
 # https://github.com/wycats/thor/blob/master/lib/thor/shell/basic.rb
       recipes.each{|e| say("#{e.key.ljust 15}# #{e.description}")}
@@ -61,7 +68,7 @@ module RailsWizard
         # Load defaults from a file; if a file specifies recipes, they'll be run *before*
         # any on the command line (or prompted for)..
         return [[], {}] unless options[:defaults]
-        defaults = File.open(options[:defaults]) {|f| YAML.load(f) }
+        defaults = Kernel.open(options[:defaults]) {|f| YAML.load(f) }
         recipes = defaults.delete('recipes') { [] }
         [recipes, defaults]
       end
